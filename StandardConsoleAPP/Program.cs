@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Log = Serilog.Log;
 
-namespace StandardConsoleApp
+namespace ProbadorPostes
 {
     internal class Program
     {

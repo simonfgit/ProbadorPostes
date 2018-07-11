@@ -1,4 +1,4 @@
-﻿namespace StandardConsoleApp
+﻿namespace ProbadorPostes
 {
     public class ConfigurationClass
     {
