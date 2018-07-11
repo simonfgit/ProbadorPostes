@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Eternet.Mikrotik;
 using Eternet.Mikrotik.Entities;
+using Eternet.Mikrotik.Entities.Interface;
 using Eternet.Mikrotik.Entities.Ip;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -18,11 +20,8 @@ namespace ProbadorPostes
             return connection;
         }
 
-        private static void Main(string[] args)
+        private static ConfigurationClass InitialSetup()
         {
-            if (args == null) throw new ArgumentNullException(nameof(args));
-
-            // Set up configuration sources.
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory))
                 .AddJsonFile("appsettings.json", optional: false);
@@ -35,18 +34,38 @@ namespace ProbadorPostes
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(cfg)
                 .CreateLogger();
+            return mycfg;
+        }
+
+        private static void Main(string[] args)
+        {
+            if (args == null) throw new ArgumentNullException(nameof(args));
+
+            // Set up configuration sources.
+            var mycfg = InitialSetup();
 
             var connection = GetMikrotikConnection(mycfg.Host, mycfg.ApiUser, mycfg.ApiPass);
 
             var neighReader = connection.CreateEntityReader<IpNeighbor>();
 
-            var neighbors = neighReader.GetAll();
+            var etherReader = connection.CreateEntityReader<InterfaceEthernet>();
 
-            foreach (var neigh in neighbors)
+            var runningethers = etherReader.GetAll().Where(p => p.Running == true);
+
+            foreach (var ether in runningethers)
             {
-                Console.WriteLine($"En la interface {neigh.Interface} se encuentra un equipo {neigh.Board} con la MAC {neigh.MacAddress}");
+                if (neighReader.GetAll().Count(i => i.Interface.Contains(ether.Name)) == 1)
+                {
+                    var neigh = neighReader.Get(n => n.Interface.Contains(ether.Name));
+                    Console.WriteLine($"En la interface {neigh.Interface} se encuentra un equipo {neigh.Board} con la MAC {neigh.MacAddress}");
+                }
+                else
+                {
+                    Console.WriteLine($"La interface {ether.Name} esta running y no ve ningun vecino");
+                }
             }
-            Console.WriteLine("Press any key to end");
+            connection.Dispose();
+            Log.Logger.Information("Done!, press any key to end");
             Console.ReadLine();
         }
     }
