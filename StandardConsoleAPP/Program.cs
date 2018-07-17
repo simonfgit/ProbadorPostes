@@ -68,8 +68,7 @@ namespace ProbadorPostes
                     }
                     else
                     {
-                        Log.Logger.Information("La Iface {Interface} no tiene IP y NO se agrega a la lista de pruebas", neigh.Interface);
-                        Log.Logger.Information("El vecino en la {Interface} no tiene IP", neigh.Interface);
+                        Log.Logger.Information("El vecino en la {Interface} NO tiene IP y NO se agrega a la lista de pruebas", neigh.Interface);
                     }
                 }
                 else
