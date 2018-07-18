@@ -1,16 +1,18 @@
-using System.Collections.Generic;
 using Eternet.Mikrotik.Entities.Interface;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
+using Microsoft.Extensions.Configuration;
 using Moq;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace Pole.Tester.Unit.Tests
 {
     public class PoleTesterUnitTests
     {
-        //Simulated data for testing purposes
-
         private static List<InterfaceEthernet> GetFakeEthList()
         {
             return new List<InterfaceEthernet>
@@ -44,24 +46,28 @@ namespace Pole.Tester.Unit.Tests
             {
                 new IpNeighbor
                 {
+                    Address4 = "192.168.0.1",
                     MacAddress = "64:D1:54:85:89:01",
                     Board = "RB921UAGS-5SHPacD",
-                    Interface = "ether2"                    
+                    Interface = "ether2"
                 },
                 new IpNeighbor
                 {
+                    Address4 = "192.168.0.2",
                     MacAddress = "64:D1:54:85:89:02",
                     Board = "RB921UAGS-5SHPacD",
                     Interface = "ether2"
                 },
                 new IpNeighbor
                 {
+                    Address4 = "",
                     MacAddress = "64:D1:54:85:89:03",
                     Board = "RB3011UiAS",
                     Interface = "ether3"
                 },
                 new IpNeighbor
                 {
+                    Address4 = "192.168.0.4",
                     MacAddress = "64:D1:54:85:89:04",
                     Board = "RB921UAGS-5SHPacD",
                     Interface = "ether4"
@@ -69,22 +75,44 @@ namespace Pole.Tester.Unit.Tests
             };
         }
 
-        private readonly List<InterfaceEthernet> _ethList;
+        private static List<(string, string)> GetFakeEthToTestList()
+        {
+            var fakeInterfacesfacesToTest = new List<(string, string)>
+            {
+                ("ether4", "192.168.0.4")
+            };
 
-        private readonly List<IpNeighbor> _neighList;
+            return fakeInterfacesfacesToTest;
+        }
+
+        private static void BuildLogger()
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(AppContext.BaseDirectory))
+                .AddJsonFile("appsettings.json", optional: false);
+
+            var cfg = builder.Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(cfg)
+                .CreateLogger();
+        }
 
         public PoleTesterUnitTests()
         {
-            _ethList = GetFakeEthList();
-            _neighList = GetFakeNeighList();
+            var ethList = GetFakeEthList();
+            var neighList = GetFakeNeighList();
+            var interfaceListToTest = GetFakeEthToTestList();
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
-            ethReader.Setup(r => r.GetAll()).Returns(_ethList.ToArray);
+            ethReader.Setup(r => r.GetAll()).Returns(ethList.ToArray);
 
             var neigReader = new Mock<IEntityReader<IpNeighbor>>();
-            neigReader.Setup(r => r.GetAll()).Returns(_neighList.ToArray);
+            neigReader.Setup(r => r.GetAll()).Returns(neighList.ToArray);
 
-            PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object);
+            BuildLogger();
+
+            var interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
         }
 
         [Fact]
