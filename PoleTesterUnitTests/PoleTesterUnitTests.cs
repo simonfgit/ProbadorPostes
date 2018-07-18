@@ -100,12 +100,12 @@ namespace Pole.Tester.Unit.Tests
 
         public PoleTesterUnitTests()
         {
-            var ethList = GetFakeEthList();
+            var ethlist = GetFakeEthList();
             var neighList = GetFakeNeighList();
             var interfaceListToTest = GetFakeEthToTestList();
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
-            ethReader.Setup(r => r.GetAll()).Returns(ethList.ToArray);
+            ethReader.Setup(r => r.GetAll()).Returns(ethlist.ToArray);
 
             var neigReader = new Mock<IEntityReader<IpNeighbor>>();
             neigReader.Setup(r => r.GetAll()).Returns(neighList.ToArray);

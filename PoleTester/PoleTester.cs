@@ -15,12 +15,13 @@ namespace Pole.Tester
             var interfacesToTest = new List<(string, string)>();
 
             var runningethers = ethReader.GetAll().Where(p => p.Running == true);
+            var list = neigReader.GetAll();
 
             foreach (var ether in runningethers)
             {
-                if (neigReader.GetAll().Count(i => i.Interface.Contains(ether.Name)) == 1)
+                if (list.Count(i => i.Interface.Contains(ether.Name)) == 1)
                 {
-                    var neig = neigReader.Get(n => n.Interface.Contains(ether.Name));
+                    var neig = list.FirstOrDefault(n => n.Interface.Contains(ether.Name));
                     Log.Logger.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
                     if (neig.Address4 != "")
                     {
