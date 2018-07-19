@@ -1,10 +1,9 @@
-﻿using Eternet.Mikrotik.Entities.ReadWriters;
-using System;
-using Eternet.Mikrotik.Entities.Interface;
+﻿using Eternet.Mikrotik.Entities.Interface;
 using Eternet.Mikrotik.Entities.Ip;
+using Eternet.Mikrotik.Entities.ReadWriters;
 using Serilog;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pole.Tester
 {
@@ -15,18 +14,18 @@ namespace Pole.Tester
             var interfacesToTest = new List<(string, string)>();
 
             var runningethers = ethReader.GetAll().Where(p => p.Running == true);
-            var list = neigReader.GetAll();
+            var neigList = neigReader.GetAll();
 
             foreach (var ether in runningethers)
             {
-                if (list.Count(i => i.Interface.Contains(ether.Name)) == 1)
+                if (neigList.Count(i => i.Interface.Contains(ether.Name)) == 1)
                 {
-                    var neig = list.FirstOrDefault(n => n.Interface.Contains(ether.Name));
+                    var neig = neigList.FirstOrDefault(n => n.Interface.Contains(ether.Name));
                     Log.Logger.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
                     if (neig.Address4 != "")
                     {
                         interfacesToTest.Add((neig.Interface, neig.Address4));
-                        Log.Logger.Information("Se agrego a la lista de interfaces a probar a Iface {Interface} con IP {Address}", neig.Interface, neig.Address4);
+                        Log.Logger.Information("Se agrego a la lista de interfaces a probar a la {Interface} con IP {Address}", neig.Interface, neig.Address4);
                     }
                     else
                     {
@@ -35,10 +34,9 @@ namespace Pole.Tester
                 }
                 else
                 {
-                    Log.Logger.Information("La interface {Interface} esta running y contiene varios o NO contiene ningun vecino/vecinos", ether.Name);
+                    Log.Logger.Information("La interface {Interface} esta running y contiene NINGUN o VARIOS vecino/s", ether.Name);
                 }
             }
-
             return interfacesToTest;
         }
     }

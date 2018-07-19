@@ -7,6 +7,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace Pole.Tester.Unit.Tests
@@ -36,6 +37,11 @@ namespace Pole.Tester.Unit.Tests
                 {
                     Name = "ether5",
                     Running = false
+                },
+                new InterfaceEthernet
+                {
+                    Name = "ether6",
+                    Running = true
                 }
             };
         }
@@ -71,6 +77,13 @@ namespace Pole.Tester.Unit.Tests
                     MacAddress = "64:D1:54:85:89:04",
                     Board = "RB921UAGS-5SHPacD",
                     Interface = "ether4"
+                },
+                new IpNeighbor
+                {
+                    Address4 = "192.168.0.6",
+                    MacAddress = "64:D1:54:85:89:06",
+                    Board = "RB921UAGS-5SHPacD",
+                    Interface = "ether6"
                 }
             };
         }
@@ -79,11 +92,15 @@ namespace Pole.Tester.Unit.Tests
         {
             var fakeInterfacesfacesToTest = new List<(string, string)>
             {
-                ("ether4", "192.168.0.4")
+                ("ether4", "192.168.0.4"),("ether6", "192.168.0.6")
             };
 
             return fakeInterfacesfacesToTest;
         }
+
+        private readonly List<(string, string)> _interfaceListToTest;
+
+        private readonly List<(string, string)> _interfaceToTest;
 
         private static void BuildLogger()
         {
@@ -100,9 +117,10 @@ namespace Pole.Tester.Unit.Tests
 
         public PoleTesterUnitTests()
         {
+            //Arrange
             var ethlist = GetFakeEthList();
             var neighList = GetFakeNeighList();
-            var interfaceListToTest = GetFakeEthToTestList();
+            _interfaceListToTest = GetFakeEthToTestList();
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
             ethReader.Setup(r => r.GetAll()).Returns(ethlist.ToArray);
@@ -112,13 +130,16 @@ namespace Pole.Tester.Unit.Tests
 
             BuildLogger();
 
-            var interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
+            //Act
+            _interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
         }
+
+        //Assert
 
         [Fact]
         public void ExpectedNeighborsOnRunningInterfaces()
         {
-            Assert.True(true);
+            Assert.True(_interfaceListToTest.Count == _interfaceToTest.Count && !_interfaceListToTest.Except(_interfaceToTest).Any());
         }
     }
 }
