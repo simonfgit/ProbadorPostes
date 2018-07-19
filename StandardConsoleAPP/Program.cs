@@ -6,9 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Pole.Tester;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Log = Serilog.Log;
 
 namespace ProbadorPostes
@@ -56,7 +54,7 @@ namespace ProbadorPostes
 
             foreach (var ethtotest in interfacesToTest)
             {
-                Console.WriteLine(ethtotest.ToString());
+                Log.Logger.Information("Agregada para testear {InterfaceTesteable}", ethtotest.ToString());
             }
 
             connection.Dispose();
