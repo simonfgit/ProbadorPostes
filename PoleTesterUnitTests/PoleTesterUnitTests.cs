@@ -15,6 +15,8 @@ namespace Pole.Tester.Unit.Tests
 {
     public class PoleTesterUnitTests
     {
+        #region private_fields&consts
+
         private static List<InterfaceEthernet> GetFakeEthList()
         {
             return new List<InterfaceEthernet>
@@ -115,6 +117,8 @@ namespace Pole.Tester.Unit.Tests
                 .ReadFrom.Configuration(cfg)
                 .CreateLogger();
         }
+
+        #endregion
 
         public PoleTesterUnitTests()
         {
