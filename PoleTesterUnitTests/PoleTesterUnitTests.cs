@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Log = Serilog.Log;
 
 namespace Pole.Tester.Unit.Tests
 {
