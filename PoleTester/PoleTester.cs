@@ -21,20 +21,20 @@ namespace Pole.Tester
                 if (neigList.Count(i => i.Interface.Contains(ether.Name)) == 1)
                 {
                     var neig = neigList.FirstOrDefault(n => n.Interface.Contains(ether.Name));
-                    Log.Logger.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
+                    log.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
                     if (neig.Address4 != "")
                     {
                         interfacesToTest.Add((neig.Interface, neig.Address4));
-                        Log.Logger.Information("Se agrego a la lista de interfaces a probar a la {Interface} con IP {Address}", neig.Interface, neig.Address4);
+                        log.Information("Se agrego a la lista de interfaces a probar a la {Interface} con IP {Address}", neig.Interface, neig.Address4);
                     }
                     else
                     {
-                        Log.Logger.Information("El vecino en la {Interface} NO tiene IP y NO se agrega a la lista de pruebas", neig.Interface);
+                        log.Error("El vecino en la {Interface} NO tiene IP y NO se agrega a la lista de pruebas", neig.Interface);
                     }
                 }
                 else
                 {
-                    Log.Logger.Information("La interface {Interface} esta running y contiene NINGUN o VARIOS vecino/s", ether.Name);
+                    log.Error("La interface {Interface} esta running y contiene NINGUN o VARIOS vecino/s", ether.Name);
                 }
             }
             return interfacesToTest;

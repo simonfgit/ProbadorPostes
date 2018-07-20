@@ -102,7 +102,7 @@ namespace Pole.Tester.Unit.Tests
 
         private readonly List<(string, string)> _interfaceToTest;
 
-        private static void BuildLogger()
+        private static void ConfigureLogger()
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(AppContext.BaseDirectory))
@@ -128,7 +128,7 @@ namespace Pole.Tester.Unit.Tests
             var neigReader = new Mock<IEntityReader<IpNeighbor>>();
             neigReader.Setup(r => r.GetAll()).Returns(neighList.ToArray);
 
-            BuildLogger();
+            ConfigureLogger();
 
             //Act
             _interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
