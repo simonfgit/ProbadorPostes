@@ -114,7 +114,7 @@ namespace Pole.Tester.Unit.Tests
 
         private static MonitorPoeResults _ether6FakeMonitorPoeResults = new MonitorPoeResults
         {
-            Name = "ether4",
+            Name = "ether6",
             PoeOut = EthernetPoeModes.AutoOn,
             PoeOutStatus = EthernetPoeStatus.PoweredOn,
             PoeOutCurrent = "123mA",
@@ -166,13 +166,13 @@ namespace Pole.Tester.Unit.Tests
 
             var connection = new Mock<ITikConnection>();
 
-            var eth4Poe = new Mock<EthernetPoe>();
+            var eth4Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
 
-            var eth6Poe = new Mock<EthernetPoe>();
+            var eth6Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
 
-            var poeList = new List<EthernetPoe> { eth4Poe.Object, eth6Poe.Object }.ToArray();
+            var poeList = new List<IMonitoreable<MonitorPoeResults>> { eth4Poe.Object, eth6Poe.Object }.ToArray();
 
-            eth4Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(_ether4FakeMonitorPoeResults);
+            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether4FakeMonitorPoeResults);
             eth6Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(_ether6FakeMonitorPoeResults);
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
@@ -184,8 +184,9 @@ namespace Pole.Tester.Unit.Tests
             ConfigureLogger();
 
             //Act
-            _interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
-            _interfacesPoeStatus = PoleTester.GetInterfacesPoeStatus(connection.Object, poeList, Log.Logger);
+            var poleTester = new PoleTester(Log.Logger);
+            _interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object);
+            _interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection.Object, poeList);
         }
 
         //Assert
