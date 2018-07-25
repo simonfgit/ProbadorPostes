@@ -1,4 +1,6 @@
+using Eternet.Mikrotik;
 using Eternet.Mikrotik.Entities.Interface;
+using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +9,6 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Xunit;
 using Log = Serilog.Log;
 
@@ -91,19 +92,53 @@ namespace Pole.Tester.Unit.Tests
             };
         }
 
-        private static List<(string, string)> GetFakeEthToTestList()
+        private static List<(string, string)> GetFakeEthToTestResults()
         {
-            var fakeInterfacesfacesToTest = new List<(string, string)>
+            var fakeInterfacesToTestResults = new List<(string, string)>
             {
                 ("ether4", "192.168.0.4"),("ether6", "192.168.0.6")
             };
 
-            return fakeInterfacesfacesToTest;
+            return fakeInterfacesToTestResults;
         }
 
-        private readonly List<(string, string)> _interfaceListToTest;
+        private static MonitorPoeResults _ether4FakeMonitorPoeResults = new MonitorPoeResults
+        {
+            Name = "ether4",
+            PoeOut = EthernetPoeModes.AutoOn,
+            PoeOutStatus = EthernetPoeStatus.ShortCircuit,
+            PoeOutCurrent = "123mA",
+            PoeOutVoltage = "24.3V",
+            PoeOutPower = "8W"
+        };
+
+        private static MonitorPoeResults _ether6FakeMonitorPoeResults = new MonitorPoeResults
+        {
+            Name = "ether4",
+            PoeOut = EthernetPoeModes.AutoOn,
+            PoeOutStatus = EthernetPoeStatus.PoweredOn,
+            PoeOutCurrent = "123mA",
+            PoeOutVoltage = "24.3V",
+            PoeOutPower = "8W"
+        };
+
+        private readonly List<(string, string)> _fakeIinterfaceListToTestResults;
 
         private readonly List<(string, string)> _interfaceToTest;
+
+        private static List<(string, EthernetPoeStatus)> GetFakeInterfacesPoeStatusResults()
+        {
+            var fakeInterfacesPoeStatusResults = new List<(string, EthernetPoeStatus)>
+            {
+                ("ether4", EthernetPoeStatus.ShortCircuit),("ether6", EthernetPoeStatus.PoweredOn)
+            };
+
+            return fakeInterfacesPoeStatusResults;
+        }
+
+        private readonly List<(string, EthernetPoeStatus)> _fakeInterfacesPoeStatusResults;
+
+        private readonly List<(string, EthernetPoeStatus)> _interfacesPoeStatus;
 
         private static void ConfigureLogger()
         {
@@ -125,7 +160,20 @@ namespace Pole.Tester.Unit.Tests
             //Arrange
             var ethlist = GetFakeEthList();
             var neighList = GetFakeNeighList();
-            _interfaceListToTest = GetFakeEthToTestList();
+
+            _fakeIinterfaceListToTestResults = GetFakeEthToTestResults();
+            _fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
+
+            var connection = new Mock<ITikConnection>();
+
+            var eth4Poe = new Mock<EthernetPoe>();
+
+            var eth6Poe = new Mock<EthernetPoe>();
+
+            var poeList = new List<EthernetPoe> { eth4Poe.Object, eth6Poe.Object }.ToArray();
+
+            eth4Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(_ether4FakeMonitorPoeResults);
+            eth6Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(_ether6FakeMonitorPoeResults);
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
             ethReader.Setup(r => r.GetAll()).Returns(ethlist.ToArray);
@@ -137,6 +185,7 @@ namespace Pole.Tester.Unit.Tests
 
             //Act
             _interfaceToTest = PoleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object, Log.Logger);
+            _interfacesPoeStatus = PoleTester.GetInterfacesPoeStatus(connection.Object, poeList, Log.Logger);
         }
 
         //Assert
@@ -144,7 +193,13 @@ namespace Pole.Tester.Unit.Tests
         [Fact]
         public void ExpectedNeighborsOnRunningInterfaces()
         {
-            Assert.True(_interfaceListToTest.Count == _interfaceToTest.Count && !_interfaceListToTest.Except(_interfaceToTest).Any());
+            Assert.Equal(_fakeIinterfaceListToTestResults, _interfaceToTest);
+        }
+
+        [Fact]
+        public void ExpectedInterfacesPoeStatus()
+        {
+            Assert.Equal(_fakeInterfacesPoeStatusResults, _interfacesPoeStatus);
         }
     }
 }

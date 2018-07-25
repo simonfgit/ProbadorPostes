@@ -7,6 +7,8 @@ using Pole.Tester;
 using Serilog;
 using System;
 using System.IO;
+using System.Linq;
+using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Log = Serilog.Log;
 
 namespace ProbadorPostes
@@ -50,11 +52,22 @@ namespace ProbadorPostes
 
             var etherReader = connection.CreateEntityReader<InterfaceEthernet>();
 
+            var poeReader = connection.CreateEntityReader<EthernetPoe>();
+
+            var poeInterfaces = poeReader.GetAll().ToArray();
+
             var interfacesToTest = PoleTester.GetNeighborsOnRunningInterfaces(etherReader, neighReader, Log.Logger);
+
+            var interfacesPoeStatus = PoleTester.GetInterfacesPoeStatus(connection, poeInterfaces, Log.Logger);
 
             foreach (var ethtotest in interfacesToTest)
             {
                 Log.Logger.Information("Agregada para testear {InterfaceTesteable}", ethtotest.ToString());
+            }
+
+            foreach (var ethPoeStatus in interfacesPoeStatus)
+            {
+                Log.Logger.Information("Estado Poe {InterfacePoeStatus}", ethPoeStatus.ToString());
             }
 
             connection.Dispose();

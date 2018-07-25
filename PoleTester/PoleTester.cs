@@ -1,4 +1,7 @@
-﻿using Eternet.Mikrotik.Entities.Interface;
+﻿using Eternet.Mikrotik;
+using Eternet.Mikrotik.Entities;
+using Eternet.Mikrotik.Entities.Interface;
+using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
 using Serilog;
@@ -38,6 +41,20 @@ namespace Pole.Tester
                 }
             }
             return interfacesToTest;
+        }
+
+        public static List<(string, EthernetPoeStatus)> GetInterfacesPoeStatus(ITikConnection connection, EthernetPoe[] poeReader, ILogger log)
+        {
+            var interfacesPoeStatus = new List<(string, EthernetPoeStatus)>();
+
+            foreach (var ethPoe in poeReader)
+            {
+                var poeStatus = ethPoe.MonitorOnce(connection);
+                log.Information("La interface {Interface} tiene un estado Poe {PoeStatus}", poeStatus.Name, poeStatus.PoeOutStatus);
+                interfacesPoeStatus.Add((poeStatus.Name, poeStatus.PoeOutStatus));
+            }
+
+            return interfacesPoeStatus;
         }
     }
 }
