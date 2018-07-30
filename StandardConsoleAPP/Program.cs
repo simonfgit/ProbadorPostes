@@ -1,14 +1,15 @@
 ﻿using Eternet.Mikrotik;
 using Eternet.Mikrotik.Entities;
 using Eternet.Mikrotik.Entities.Interface;
+using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
+using Eternet.Mikrotik.Entities.Tool;
 using Microsoft.Extensions.Configuration;
 using Pole.Tester;
 using Serilog;
 using System;
 using System.IO;
 using System.Linq;
-using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Log = Serilog.Log;
 
 namespace ProbadorPostes
@@ -20,6 +21,24 @@ namespace ProbadorPostes
             var connection = ConnectionFactory.CreateConnection(TikConnectionType.Api);
             connection.Open(host, user, pass);
             return connection;
+        }
+
+        private static void RunBandwidthTestSample(ITikConnection connection)
+        {
+            var p = new BandwidthTestParameters
+            {
+                Address = "192.168.0.70",
+                User = "admin",
+                Password = "",
+                Protocol = BandwidthTestProtocols.Udp,
+                Duration = "10s",
+                LocalTxSpeed = "1024k",
+                RemoteTxSpeed = "1024k"
+            };
+            var btest = new BandwidthTest(connection);
+            var results = btest.Run(p, 5);
+            foreach (var r in results)
+                Console.WriteLine($"{r.Status} {r.RxTotalAverage} {r.TxTotalAverage}");
         }
 
         private static ConfigurationClass InitialSetup()
