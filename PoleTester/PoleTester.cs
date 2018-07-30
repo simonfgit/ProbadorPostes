@@ -12,11 +12,11 @@ namespace Pole.Tester
 {
     public class PoleTester
     {
-        public static ILogger Logger;
+        private readonly ILogger _logger;
 
         public PoleTester(ILogger logger)
         {
-            Logger = logger;
+            _logger = logger;
         }
 
         public List<(string, string)> GetNeighborsOnRunningInterfaces(IEntityReader<InterfaceEthernet> ethReader, IEntityReader<IpNeighbor> neigReader)
@@ -31,20 +31,20 @@ namespace Pole.Tester
                 if (neigList.Count(i => i.Interface.Contains(ether.Name)) == 1)
                 {
                     var neig = neigList.FirstOrDefault(n => n.Interface.Contains(ether.Name));
-                    Logger.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
+                    _logger.Information("En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}", neig.Interface, neig.Board, neig.MacAddress);
                     if (neig.Address4 != "")
                     {
                         interfacesToTest.Add((neig.Interface, neig.Address4));
-                        Logger.Information("Se agrego a la lista de interfaces a probar a la {Interface} con IP {Address}", neig.Interface, neig.Address4);
+                        _logger.Information("Se agrego a la lista de interfaces a probar a la {Interface} con IP {Address}", neig.Interface, neig.Address4);
                     }
                     else
                     {
-                        Logger.Error("El vecino en la {Interface} NO tiene IP y NO se agrega a la lista de pruebas", neig.Interface);
+                        _logger.Error("El vecino en la {Interface} NO tiene IP y NO se agrega a la lista de pruebas", neig.Interface);
                     }
                 }
                 else
                 {
-                    Logger.Error("La interface {Interface} esta running y contiene NINGUN o VARIOS vecino/s", ether.Name);
+                    _logger.Error("La interface {Interface} esta running y contiene NINGUN o VARIOS vecino/s", ether.Name);
                 }
             }
             return interfacesToTest;
@@ -57,7 +57,7 @@ namespace Pole.Tester
             foreach (var ethPoe in poeReader)
             {
                 var poeStatus = ethPoe.MonitorOnce(connection);
-                Logger.Information("La interface {Interface} tiene un estado Poe {PoeStatus}", poeStatus.Name, poeStatus.PoeOutStatus);
+                _logger.Information("La interface {Interface} tiene un estado Poe {PoeStatus}", poeStatus.Name, poeStatus.PoeOutStatus);
                 interfacesPoeStatus.Add((poeStatus.Name, poeStatus.PoeOutStatus));
             }
 
