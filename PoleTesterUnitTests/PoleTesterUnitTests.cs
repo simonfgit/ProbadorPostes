@@ -3,14 +3,11 @@ using Eternet.Mikrotik.Entities.Interface;
 using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Serilog;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using Xunit;
-using Log = Serilog.Log;
+
 
 namespace Pole.Tester.Unit.Tests
 {
@@ -140,18 +137,18 @@ namespace Pole.Tester.Unit.Tests
 
         private readonly List<(string, EthernetPoeStatus)> _interfacesPoeStatus;
 
-        private static void ConfigureLogger()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppContext.BaseDirectory))
-                .AddJsonFile("appsettings.json", optional: false);
+        //private static void ConfigureLogger()
+        //{
+        //    var builder = new ConfigurationBuilder()
+        //        .SetBasePath(Path.Combine(AppContext.BaseDirectory))
+        //        .AddJsonFile("appsettings.json", optional: false);
 
-            var cfg = builder.Build();
+        //    var cfg = builder.Build();
 
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(cfg)
-                .CreateLogger();
-        }
+        //    Log.Logger = new LoggerConfiguration()
+        //        .ReadFrom.Configuration(cfg)
+        //        .CreateLogger();
+        //}
 
         #endregion
 
@@ -163,6 +160,8 @@ namespace Pole.Tester.Unit.Tests
 
             _fakeIinterfaceListToTestResults = GetFakeEthToTestResults();
             _fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
+
+            var logger = new Mock<ILogger>();
 
             var connection = new Mock<ITikConnection>();
 
@@ -181,10 +180,8 @@ namespace Pole.Tester.Unit.Tests
             var neigReader = new Mock<IEntityReader<IpNeighbor>>();
             neigReader.Setup(r => r.GetAll()).Returns(neighList.ToArray);
 
-            ConfigureLogger();
-
             //Act
-            var poleTester = new PoleTester(Log.Logger);
+            var poleTester = new PoleTester(logger.Object);
             _interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object);
             _interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection.Object, poeList);
         }
