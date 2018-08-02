@@ -1,5 +1,6 @@
 using Eternet.Mikrotik;
 using Eternet.Mikrotik.Entities.Interface;
+using Eternet.Mikrotik.Entities.Interface.Ethernet;
 using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
@@ -137,6 +138,54 @@ namespace Pole.Tester.Unit.Tests
 
         private readonly List<(string, EthernetPoeStatus)> _interfacesPoeStatus;
 
+        private readonly List<(string, string, bool, EthernetRates)> _fakeInterfacesNegotiation;
+
+        private readonly List<(string, string, bool, EthernetRates)> _interfacesNegotiation;
+
+        private static MonitorEthernetResults _ether2FakeMonitorNegotiation = new MonitorEthernetResults
+        {
+            Name = "ether2",
+            AutoNegotiation = "done",
+            FullDuplex = true,
+            Rate = EthernetRates.Rate100Mbps
+        };
+
+        private static MonitorEthernetResults _ether3FakeMonitorNegotiation = new MonitorEthernetResults
+        {
+            Name = "ether3",
+            AutoNegotiation = "done",
+            FullDuplex = false,
+            Rate = EthernetRates.Rate1Gbps
+        };
+
+        private static MonitorEthernetResults _ether4FakeMonitorNegotiation = new MonitorEthernetResults
+        {
+            Name = "ether4",
+            AutoNegotiation = "done",
+            FullDuplex = true,
+            Rate = EthernetRates.Rate1Gbps
+        };
+
+        private static MonitorEthernetResults _ether6FakeMonitorNegotiation = new MonitorEthernetResults
+        {
+            Name = "ether6",
+            AutoNegotiation = "done",
+            FullDuplex = false,
+            Rate = EthernetRates.Rate1Gbps
+        };
+
+        private static List<(string, string, bool, EthernetRates)> GetFakeInterfacesNegotiation()
+        {
+            var fakeInterfacesNegociation = new List<(string, string, bool, EthernetRates)>
+            {
+               ("ether2", "done", true, EthernetRates.Rate100Mbps), ("ether3", "done", false, EthernetRates.Rate1Gbps),
+               ("ether4", "done", true, EthernetRates.Rate1Gbps), ("ether6", "done", false, EthernetRates.Rate1Gbps)
+            };
+
+            return fakeInterfacesNegociation;
+        }
+
+
         //private static void ConfigureLogger()
         //{
         //    var builder = new ConfigurationBuilder()
@@ -160,6 +209,7 @@ namespace Pole.Tester.Unit.Tests
 
             _fakeIinterfaceListToTestResults = GetFakeEthToTestResults();
             _fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
+            _fakeInterfacesNegotiation = GetFakeInterfacesNegotiation();
 
             var logger = new Mock<ILogger>();
 
@@ -180,10 +230,27 @@ namespace Pole.Tester.Unit.Tests
             var neigReader = new Mock<IEntityReader<IpNeighbor>>();
             neigReader.Setup(r => r.GetAll()).Returns(neighList.ToArray);
 
+            var eth2Negotiation = new Mock<IMonitoreable<MonitorEthernetResults>>();
+
+            var eth3Negotiation = new Mock<IMonitoreable<MonitorEthernetResults>>();
+
+            var eth4Negotiation = new Mock<IMonitoreable<MonitorEthernetResults>>();
+
+            var eth6Negotiation = new Mock<IMonitoreable<MonitorEthernetResults>>();
+
+            var negotiationList = new List<IMonitoreable<MonitorEthernetResults>> { eth2Negotiation.Object, eth3Negotiation.Object, eth4Negotiation.Object, eth6Negotiation.Object }.ToArray();
+
+            eth2Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether2FakeMonitorNegotiation);
+            eth3Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether3FakeMonitorNegotiation);
+            eth4Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether4FakeMonitorNegotiation);
+            eth6Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether6FakeMonitorNegotiation);
+
             //Act
             var poleTester = new PoleTester(logger.Object);
             _interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object);
             _interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection.Object, poeList);
+            var negotiationTester = new NegotiationTester(logger.Object);
+            _interfacesNegotiation = negotiationTester.GetInterfacesNegotiation(connection.Object, negotiationList);
         }
 
         //Assert
@@ -199,5 +266,13 @@ namespace Pole.Tester.Unit.Tests
         {
             Assert.Equal(_fakeInterfacesPoeStatusResults, _interfacesPoeStatus);
         }
+
+        [Fact]
+        public void ExpectedInterfaceNegotiation()
+        {
+            Assert.Equal(_fakeInterfacesNegotiation, _interfacesNegotiation);
+        }
+
+
     }
 }

@@ -81,6 +81,8 @@ namespace ProbadorPostes
 
             var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection, poeInterfaces);
 
+
+
             foreach (var ethtotest in interfacesToTest)
             {
                 Log.Logger.Information("Agregada para testear {InterfaceTesteable}", ethtotest.ToString());
