@@ -75,11 +75,11 @@ namespace ProbadorPostes
 
             var poeInterfaces = poeReader.GetAll().ToArray();
 
-            var poleTester = new PoleTester(Log.Logger);
+            var poleTester = new PoleTester(Log.Logger, connection);
 
             var interfacesToTest = poleTester.GetNeighborsOnRunningInterfaces(etherReader, neighReader);
 
-            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection, poeInterfaces);
+            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeInterfaces);
 
             var runningethers = etherReader.GetAll().Where(p => p.Running).ToArray();
 
