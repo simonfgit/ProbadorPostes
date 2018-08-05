@@ -100,7 +100,7 @@ namespace Pole.Tester.Unit.Tests
             return fakeInterfacesToTestResults;
         }
 
-        private static MonitorPoeResults _ether4FakeMonitorPoeResults = new MonitorPoeResults
+        private static readonly MonitorPoeResults Ether4FakeMonitorPoeResults = new MonitorPoeResults
         {
             Name = "ether4",
             PoeOut = EthernetPoeModes.AutoOn,
@@ -110,7 +110,7 @@ namespace Pole.Tester.Unit.Tests
             PoeOutPower = "8W"
         };
 
-        private static MonitorPoeResults _ether6FakeMonitorPoeResults = new MonitorPoeResults
+        private static readonly MonitorPoeResults Ether6FakeMonitorPoeResults = new MonitorPoeResults
         {
             Name = "ether6",
             PoeOut = EthernetPoeModes.AutoOn,
@@ -142,7 +142,7 @@ namespace Pole.Tester.Unit.Tests
 
         private readonly List<(string, string, bool, EthernetRates)> _interfacesNegotiation;
 
-        private static MonitorEthernetResults _ether2FakeMonitorNegotiation = new MonitorEthernetResults
+        private static readonly MonitorEthernetResults Ether2FakeMonitorNegotiation = new MonitorEthernetResults
         {
             Name = "ether2",
             AutoNegotiation = "done",
@@ -150,7 +150,7 @@ namespace Pole.Tester.Unit.Tests
             Rate = EthernetRates.Rate100Mbps
         };
 
-        private static MonitorEthernetResults _ether3FakeMonitorNegotiation = new MonitorEthernetResults
+        private static readonly MonitorEthernetResults Ether3FakeMonitorNegotiation = new MonitorEthernetResults
         {
             Name = "ether3",
             AutoNegotiation = "done",
@@ -158,7 +158,7 @@ namespace Pole.Tester.Unit.Tests
             Rate = EthernetRates.Rate1Gbps
         };
 
-        private static MonitorEthernetResults _ether4FakeMonitorNegotiation = new MonitorEthernetResults
+        private static readonly MonitorEthernetResults Ether4FakeMonitorNegotiation = new MonitorEthernetResults
         {
             Name = "ether4",
             AutoNegotiation = "done",
@@ -166,7 +166,7 @@ namespace Pole.Tester.Unit.Tests
             Rate = EthernetRates.Rate1Gbps
         };
 
-        private static MonitorEthernetResults _ether6FakeMonitorNegotiation = new MonitorEthernetResults
+        private static readonly MonitorEthernetResults Ether6FakeMonitorNegotiation = new MonitorEthernetResults
         {
             Name = "ether6",
             AutoNegotiation = "done",
@@ -184,20 +184,6 @@ namespace Pole.Tester.Unit.Tests
 
             return fakeInterfacesNegociation;
         }
-
-
-        //private static void ConfigureLogger()
-        //{
-        //    var builder = new ConfigurationBuilder()
-        //        .SetBasePath(Path.Combine(AppContext.BaseDirectory))
-        //        .AddJsonFile("appsettings.json", optional: false);
-
-        //    var cfg = builder.Build();
-
-        //    Log.Logger = new LoggerConfiguration()
-        //        .ReadFrom.Configuration(cfg)
-        //        .CreateLogger();
-        //}
 
         #endregion
 
@@ -221,8 +207,8 @@ namespace Pole.Tester.Unit.Tests
 
             var poeList = new List<IMonitoreable<MonitorPoeResults>> { eth4Poe.Object, eth6Poe.Object }.ToArray();
 
-            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether4FakeMonitorPoeResults);
-            eth6Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(_ether6FakeMonitorPoeResults);
+            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether4FakeMonitorPoeResults);
+            eth6Poe.Setup(c => c.MonitorOnce(connection.Object)).Returns(Ether6FakeMonitorPoeResults);
 
             var ethReader = new Mock<IEntityReader<InterfaceEthernet>>();
             ethReader.Setup(r => r.GetAll()).Returns(ethlist.ToArray);
@@ -240,15 +226,15 @@ namespace Pole.Tester.Unit.Tests
 
             var negotiationList = new List<IMonitoreable<MonitorEthernetResults>> { eth2Negotiation.Object, eth3Negotiation.Object, eth4Negotiation.Object, eth6Negotiation.Object }.ToArray();
 
-            eth2Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether2FakeMonitorNegotiation);
-            eth3Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether3FakeMonitorNegotiation);
-            eth4Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether4FakeMonitorNegotiation);
-            eth6Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(_ether6FakeMonitorNegotiation);
+            eth2Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether2FakeMonitorNegotiation);
+            eth3Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether3FakeMonitorNegotiation);
+            eth4Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether4FakeMonitorNegotiation);
+            eth6Negotiation.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether6FakeMonitorNegotiation);
 
             //Act
-            var poleTester = new PoleTester(logger.Object);
+            var poleTester = new PoleTester(logger.Object, connection.Object);
             _interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces(ethReader.Object, neigReader.Object);
-            _interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(connection.Object, poeList);
+            _interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeList);
             var negotiationTester = new NegotiationTester(logger.Object);
             _interfacesNegotiation = negotiationTester.GetInterfacesNegotiation(connection.Object, negotiationList);
         }
