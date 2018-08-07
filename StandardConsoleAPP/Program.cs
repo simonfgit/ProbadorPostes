@@ -83,9 +83,7 @@ namespace ProbadorPostes
 
             var runningethers = etherReader.GetAll().Where(p => p.Running).ToArray();
 
-            var poleNegotiation = new NegotiationTester(Log.Logger);
-
-            var interfacesNegotiation = poleNegotiation.GetInterfacesNegotiation(connection, runningethers);
+            var interfacesNegotiation = poleTester.GetInterfacesNegotiation(etherReader);
 
             foreach (var ethtotest in interfacesToTest)
             {
@@ -103,7 +101,7 @@ namespace ProbadorPostes
             }
 
             connection.Dispose();
-            Log.Logger.Information("Done!, press any key to end");
+            Log.Logger.Information("Done!, press Enter to end");
             Console.ReadLine();
         }
     }
