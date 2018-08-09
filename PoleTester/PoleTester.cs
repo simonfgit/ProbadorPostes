@@ -32,7 +32,7 @@ namespace Pole.Tester
             {
                 var lista = neigList.Where(n => n.Interface.ToLower().Equals(ether.Name.ToLower())).ToArray();
                 var neig = lista.FirstOrDefault();
-                if (neig != null && lista.Length == 1) 
+                if (neig != null && lista.Length == 1)
                 {
                     _logger.Information(
                         "En la interface {Interface} se encuentra un equipo {Modelo} con la MAC {MacAddress}",
@@ -75,14 +75,14 @@ namespace Pole.Tester
             return results;
         }
 
-        public List<(string, string, bool, EthernetRates)> GetInterfacesNegotiation(
+        public List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> GetInterfacesNegotiation(
             IEntityReader<InterfaceEthernet> ethReader)
         {
-            var interfacesRunningNegotiation = new List<(string, string, bool, EthernetRates)>();
+            var interfacesRunningNegotiation = new List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)>();
 
             var allIfaces = ethReader.GetAll();
             var allRunning = allIfaces.Where(i => i.Running);
-            
+
             foreach (var iface in allRunning)
             {
                 var negoStatus = iface.MonitorOnce(_connection);
@@ -96,5 +96,19 @@ namespace Pole.Tester
             return interfacesRunningNegotiation;
         }
 
+        public List<(string duration, long txAverage, long rxAverage, long lostPackets)> RunBandwithTests
+            (List<(string iface, string ip)> ifacesToTest, List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation)
+        {
+            var btList = new List<(string duration, long txAverage, long rxAverage, long lostPackets)>();
+
+            foreach (var iface in ifacesToTest)
+            {
+                var name = iface.iface;
+                var nego = ifacesNegotiation.Find(n => n.name == name).rate.ToString();
+                //case
+            }
+
+            return btList;
+        }
     }
 }

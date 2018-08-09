@@ -81,7 +81,7 @@ namespace ProbadorPostes
 
             var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeInterfaces);
 
-            var runningethers = etherReader.GetAll().Where(p => p.Running).ToArray();
+            //var runningethers = etherReader.GetAll().Where(p => p.Running).ToArray();
 
             var interfacesNegotiation = poleTester.GetInterfacesNegotiation(etherReader);
 
