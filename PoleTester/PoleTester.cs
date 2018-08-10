@@ -4,6 +4,7 @@ using Eternet.Mikrotik.Entities.Interface.Ethernet;
 using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
+using Eternet.Mikrotik.Entities.Tool;
 using Serilog;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,11 +102,40 @@ namespace Pole.Tester
         {
             var btList = new List<(string duration, long txAverage, long rxAverage, long lostPackets)>();
 
+            var bt = new BandwidthTest(_connection);
+
+            var results = new List<BandwidthTestResult[]>();
+
+            var param = new BandwidthTestParameters
+            {
+                User = "admin",
+                Password = "",
+                Protocol = BandwidthTestProtocols.Udp,
+                Duration = "30s",
+                Direction = BandwidthTestDirections.Both
+            };
+
             foreach (var iface in ifacesToTest)
             {
-                var name = iface.iface;
-                var nego = ifacesNegotiation.Find(n => n.name == name).rate.ToString();
-                //case
+                var inter = iface.iface;
+                var nego = ifacesNegotiation.Find(n => n.name == inter);
+
+                if (nego.fullduplex && nego.rate != EthernetRates.Rate10Mbps)
+                {
+                    param.Address = iface.ip;
+                    if (nego.rate == EthernetRates.Rate100Mbps)
+                    {
+                        param.LocalTxSpeed = "81920k";
+                        param.RemoteTxSpeed = "81920k";
+                        results.Add(bt.Run(param, 1));
+                    }
+                    else
+                    {
+                        param.LocalTxSpeed = "122880k";
+                        param.RemoteTxSpeed = "122880k";
+                        results.Add(bt.Run(param, 1));
+                    }
+                }
             }
 
             return btList;

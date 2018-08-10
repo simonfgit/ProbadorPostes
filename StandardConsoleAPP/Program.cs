@@ -100,6 +100,8 @@ namespace ProbadorPostes
                 Log.Logger.Information("Negotiation {InterfaceNegotiation}", ifaceNegotiation.ToString());
             }
 
+            var btList = poleTester.RunBandwithTests(interfacesToTest, interfacesNegotiation);
+
             connection.Dispose();
             Log.Logger.Information("Done!, press Enter to end");
             Console.ReadLine();
