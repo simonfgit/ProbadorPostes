@@ -6,6 +6,7 @@ using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
 using Eternet.Mikrotik.Entities.Tool;
 using Serilog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -123,6 +124,7 @@ namespace Pole.Tester
                 if (nego.fullduplex && nego.rate != EthernetRates.Rate10Mbps)
                 {
                     param.Address = iface.ip;
+
                     if (nego.rate == EthernetRates.Rate100Mbps)
                     {
                         param.LocalTxSpeed = "81920k";
@@ -135,6 +137,10 @@ namespace Pole.Tester
                         param.RemoteTxSpeed = "122880k";
                         results.Add(bt.Run(param, 1));
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Negociación inválida");
                 }
             }
 
