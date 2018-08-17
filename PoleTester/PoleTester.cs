@@ -98,12 +98,10 @@ namespace Pole.Tester
             return interfacesRunningNegotiation;
         }
 
-        public List<string> RunBandwithTests
-            (List<(string iface, string ip)> ifacesToTest, List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation)
+        public List<(string iface, string bandWith)> RunBandwithTests
+            (List<(string iface, string ip)> ifacesToTest, List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation, BandwidthTest bTest)
         {
-            var btList = new List<string>();
-
-            var bt = new BandwidthTest(_connection);
+            var btList = new List<(string iface, string bandWith)>();
 
             var result = new BandwidthTestResult();
 
@@ -129,22 +127,23 @@ namespace Pole.Tester
                     {
                         param.LocalTxSpeed = "81920k";
                         param.RemoteTxSpeed = "81920k";
-                        result = bt.Run(param, 30).Last();
+                        result = bTest.Run(param, 30).Last();
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
                             " con {Mbps}. Los resultados fueron {Tx} de bajada y {Rx} de subida con {PLost} paquetes perdidos",
                             inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets);
-                        btList.Add(inter);
+                        btList.Add((inter, param.LocalTxSpeed));
                     }
                     else
                     {
                         param.LocalTxSpeed = "122880k";
                         param.RemoteTxSpeed = "122880k";
+                        result = bTest.Run(param, 30).Last();
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
                             " con {Mbps}. Los resultados fueron {Tx} de bajada y {Rx} de subida con {PLost} paquetes perdidos",
                             inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets);
-                        btList.Add(inter);
+                        btList.Add((inter, param.LocalTxSpeed));
                     }
                 }
                 else

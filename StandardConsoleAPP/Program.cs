@@ -81,8 +81,6 @@ namespace ProbadorPostes
 
             var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeInterfaces);
 
-            //var runningethers = etherReader.GetAll().Where(p => p.Running).ToArray();
-
             var interfacesNegotiation = poleTester.GetInterfacesNegotiation(etherReader);
 
             foreach (var ethtotest in interfacesToTest)
@@ -100,7 +98,7 @@ namespace ProbadorPostes
                 Log.Logger.Information("Negotiation {InterfaceNegotiation}", ifaceNegotiation.ToString());
             }
 
-            var btList = poleTester.RunBandwithTests(interfacesToTest, interfacesNegotiation);
+            //var btList = poleTester.RunBandwithTests(interfacesToTest, interfacesNegotiation,);
 
             connection.Dispose();
             Log.Logger.Information("Done!, press Enter to end");
