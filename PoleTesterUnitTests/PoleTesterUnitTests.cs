@@ -4,6 +4,7 @@ using Eternet.Mikrotik.Entities.Interface.Ethernet;
 using Eternet.Mikrotik.Entities.Interface.Ethernet.Poe;
 using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
+using Eternet.Mikrotik.Entities.Tool;
 using Moq;
 using Serilog;
 using System.Collections.Generic;
@@ -45,6 +46,11 @@ namespace Pole.Tester.Unit.Tests
                 {
                     Name = "ether6",
                     Running = true
+                },
+                new InterfaceEthernet
+                {
+                    Name = "ether7",
+                    Running = true
                 }
             };
         }
@@ -55,10 +61,17 @@ namespace Pole.Tester.Unit.Tests
             {
                 new IpNeighbor
                 {
+                    Address4 = "192.168.0.7",
+                    MacAddress = "64:D1:54:85:89:07",
+                    Board = "RB921UAGS-5SHPacD",
+                    Interface = "ether1"
+                },
+                new IpNeighbor
+                {
                     Address4 = "192.168.0.1",
                     MacAddress = "64:D1:54:85:89:01",
                     Board = "RB921UAGS-5SHPacD",
-                    Interface = "ether2"
+                    Interface = "ether1"
                 },
                 new IpNeighbor
                 {
@@ -69,7 +82,7 @@ namespace Pole.Tester.Unit.Tests
                 },
                 new IpNeighbor
                 {
-                    Address4 = "",
+                    Address4 = "192.168.0.5",
                     MacAddress = "64:D1:54:85:89:03",
                     Board = "RB3011UiAS",
                     Interface = "ether3"
@@ -87,6 +100,13 @@ namespace Pole.Tester.Unit.Tests
                     MacAddress = "64:D1:54:85:89:06",
                     Board = "RB921UAGS-5SHPacD",
                     Interface = "ether6"
+                },
+                new IpNeighbor
+                {
+                    Address4 = "",
+                    MacAddress = "64:D1:54:85:89:08",
+                    Board = "RB3011UiAS",
+                    Interface = "ether7"
                 }
             };
         }
@@ -95,6 +115,7 @@ namespace Pole.Tester.Unit.Tests
         {
             var fakeInterfacesToTestResults = new List<(string, string)>
             {
+                ("ether2", "192.168.0.2"),("ether3", "192.168.0.5"),
                 ("ether4", "192.168.0.4"),("ether6", "192.168.0.6")
             };
 
@@ -152,14 +173,14 @@ namespace Pole.Tester.Unit.Tests
             Name = "ether4",
             AutoNegotiation = "done",
             FullDuplex = true,
-            Rate = EthernetRates.Rate100Mbps
+            Rate = EthernetRates.Rate10Mbps
         };
 
         private static readonly MonitorEthernetResults Ether6FakeMonitorNegotiation = new MonitorEthernetResults
         {
             Name = "ether6",
             AutoNegotiation = "done",
-            FullDuplex = false,
+            FullDuplex = true,
             Rate = EthernetRates.Rate1Gbps
         };
 
@@ -168,40 +189,49 @@ namespace Pole.Tester.Unit.Tests
             var fakeInterfacesNegociation = new List<(string, string, bool, EthernetRates)>
             {
                ("ether2", "done", true, EthernetRates.Rate100Mbps), ("ether3", "done", false, EthernetRates.Rate1Gbps),
-               ("ether4", "done", true, EthernetRates.Rate100Mbps), ("ether6", "done", false, EthernetRates.Rate1Gbps)
+               ("ether4", "done", true, EthernetRates.Rate10Mbps), ("ether6", "done", true, EthernetRates.Rate1Gbps)
             };
 
             return fakeInterfacesNegociation;
         }
 
-        //private static List<(string duration, long txAverage, long rxAverage, long lostPackets)> GetFakeBandwithResults()
+        private static List<string> GetFakeBandwithTestInterfaces()
+        {
+            var fakeBandwithTestInterfaces = new List<string> { "ether2", "ether6" };
+
+            return fakeBandwithTestInterfaces;
+        }
+
+
+        //private static List<(string iface, string duration, long txAverage, long rxAverage, long lostPackets)> GetFakeBandwithResults()
         //{
-        //    var fakeBandwithResults = new List<(string duration, long txAverage, long rxAverage, long lostPackets)>()
+        //    var fakeBandwithResults = new List<(string iface, string duration, long txAverage, long rxAverage, long lostPackets)>()
         //    {
-        //        ("20s", 90, 90, 0), ("20s", 150, 150, 0)
+        //        ("ether2", "20s", 90, 90, 0), ("ether6", "20s", 150, 150, 0)
         //    };
 
         //    return fakeBandwithResults;
         //}
 
-        //private static readonly BandwidthTestResult ether4FakeBandwidthTestResult = new BandwidthTestResult
-        //{
-        //    Duration = "20s",
-        //    TxTotalAverage = 90,
-        //    RxTotalAverage = 90,
-        //    LostPackets = 0
-        //};
+        private static readonly BandwidthTestResult ether2FakeBandwidthTestResult = new BandwidthTestResult
+        {
+            Duration = "20s",
+            TxTotalAverage = 80,
+            RxTotalAverage = 80,
+            LostPackets = 0
+        };
 
-        //private static readonly BandwidthTestResult ether6FakeBandwidthTestResult = new BandwidthTestResult
-        //{
-        //    Duration = "20s",
-        //    TxTotalAverage = 150,
-        //    RxTotalAverage = 150,
-        //    LostPackets = 0
-        //};
+        private static readonly BandwidthTestResult ether6FakeBandwidthTestResult = new BandwidthTestResult
+        {
+            Duration = "20s",
+            TxTotalAverage = 120,
+            RxTotalAverage = 120,
+            LostPackets = 0
+        };
 
         private ITestOutputHelper _out;
         private static int _count;
+        private static int _count2;
 
         private Mock<IEntityReader<InterfaceEthernet>> _ethReader;
 
@@ -215,6 +245,7 @@ namespace Pole.Tester.Unit.Tests
         {
             _out = output;
             _count = 0;
+            _count2 = 0;
 
             _connection = new Mock<ITikConnection>();
 
@@ -242,7 +273,8 @@ namespace Pole.Tester.Unit.Tests
             var poleTester = new PoleTester(_logger.Object, _connection.Object);
 
             //Act
-            var interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces(_ethReader.Object, neigReader.Object);
+            var interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces
+                (_ethReader.Object, neigReader.Object);
 
             //Assert
             Assert.Equal(fakeInterfaceListToTestResults, interfaceToTest);
@@ -257,10 +289,13 @@ namespace Pole.Tester.Unit.Tests
 
             var eth6Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
 
-            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether4FakeMonitorPoeResults);
-            eth6Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>())).Returns(Ether6FakeMonitorPoeResults);
+            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns(Ether4FakeMonitorPoeResults);
+            eth6Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns(Ether6FakeMonitorPoeResults);
 
-            var poeList = new List<IMonitoreable<MonitorPoeResults>> { eth4Poe.Object, eth6Poe.Object }.ToArray();
+            var poeList = new List<IMonitoreable<MonitorPoeResults>>
+                { eth4Poe.Object, eth6Poe.Object }.ToArray();
 
             //var poeReader = new Mock<IMonitoreable<MonitorEthernetResults>>();
 
@@ -285,29 +320,35 @@ namespace Pole.Tester.Unit.Tests
             var eth2 = new Mock<InterfaceEthernet>();
             eth2.Object.Name = "ether2";
             eth2.Object.Running = true;
-            eth2.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>())).Returns<ITikConnection>(MonitorOnceLocal);
+            eth2.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorOnceLocal);
 
             var eth3 = new Mock<InterfaceEthernet>();
             eth3.Object.Name = "ether3";
             eth3.Object.Running = true;
-            eth3.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>())).Returns<ITikConnection>(MonitorOnceLocal);
+            eth3.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorOnceLocal);
 
             var eth4 = new Mock<InterfaceEthernet>();
             eth4.Object.Name = "ether4";
             eth4.Object.Running = true;
-            eth4.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>())).Returns<ITikConnection>(MonitorOnceLocal);
+            eth4.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorOnceLocal);
 
             var eth5 = new Mock<InterfaceEthernet>();
             eth5.Object.Name = "ether5";
             eth5.Object.Running = false;
-            eth5.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>())).Returns<ITikConnection>(MonitorOnceLocal);
+            eth5.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorOnceLocal);
 
             var eth6 = new Mock<InterfaceEthernet>();
             eth6.Object.Name = "ether6";
             eth6.Object.Running = true;
-            eth6.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>())).Returns<ITikConnection>(MonitorOnceLocal);
+            eth6.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorOnceLocal);
 
-            var list = new List<InterfaceEthernet> { eth2.Object, eth3.Object, eth4.Object, eth5.Object, eth6.Object };
+            var list = new List<InterfaceEthernet>
+                { eth2.Object, eth3.Object, eth4.Object, eth5.Object, eth6.Object };
 
             _ethReader.Setup(r => r.GetAll()).Returns(() =>
             {
@@ -320,8 +361,53 @@ namespace Pole.Tester.Unit.Tests
             var interfacesNegotiation = poleTester.GetInterfacesNegotiation(_ethReader.Object);
 
             Assert.Equal(fakeInterfacesNegotiation, interfacesNegotiation);
+        }
+
+        [Fact]
+        public void ExpectedBandwithTest()
+        {
+            var fakeInterfaceListToTestResults = GetFakeEthToTestResults();
+
+            var fakeInterfacesNegotiation = GetFakeInterfacesNegotiation();
+
+            var btest = new Mock<BandwidthTest>();
+            btest.Setup(b => b.Run(It.IsAny<BandwidthTestParameters>(), It.IsAny<int>()))
+                .Returns<ITikConnection>(RunLocal);
+
+
+
+            var list = new List<BandwidthTestResult>
+                { btEther2.Object, btEther6.Object };
+
+            var btReader = new Mock<IEntityReader<BandwidthTestResult>>();
+
+            btReader.Setup(b => b.GetAll()).Returns(list.ToArray());
+
+            var poleTester = new PoleTester(_logger.Object, _connection.Object);
+
+            var btResults = poleTester.RunBandwithTests
+                (fakeInterfaceListToTestResults, fakeInterfacesNegotiation);
+
+            //Assert.Equal(fakeBandwithResults, btResults);
 
         }
+
+        //[Fact]
+        //public void ExpectedBandwithTestInterfaces()
+        //{
+        //    var fakeInterfaceListToTestResults = GetFakeEthToTestResults();
+
+        //    var fakeInterfacesNegotiation = GetFakeInterfacesNegotiation();
+
+        //    var fakeBandwithTestInterfaces = GetFakeBandwithTestInterfaces();
+
+        //    var poleTester = new PoleTester(_logger.Object, _connection.Object);
+
+        //    var btResults = poleTester.RunBandwithTests
+        //           (fakeInterfaceListToTestResults, fakeInterfacesNegotiation);
+
+        //    Assert.Equal(fakeBandwithTestInterfaces, btResults);
+        //}
 
         //[Fact]
         //public void ExpectedBandwithTest()
@@ -330,15 +416,35 @@ namespace Pole.Tester.Unit.Tests
 
         //    var fakeInterfaceListToTestResults = GetFakeEthToTestResults();
 
-        //    var btEther4 = new Mock<IMonitoreable<BandwidthTestResult>>();
+        //    var fakeInterfacesNegotiation = GetFakeInterfacesNegotiation();
+
+        //    var btEther2 = new Mock<IMonitoreable<BandwidthTestResult>>();
         //    var btEther6 = new Mock<IMonitoreable<BandwidthTestResult>>();
 
-        //    btEther4.Setup(b => b.MonitorOnce(It.IsAny<ITikConnection>()))
-        //        .Returns(ether4FakeBandwidthTestResult);
+        //    btEther2.Setup(b => b.MonitorOnce(It.IsAny<ITikConnection>()))
+        //        .Returns(ether2FakeBandwidthTestResult);
         //    btEther6.Setup(b => b.MonitorOnce(It.IsAny<ITikConnection>()))
         //        .Returns(ether6FakeBandwidthTestResult);
 
-        //    var list = new List<IMonitoreable<BandwidthTestResult>> {btEther4.Object, btEther6.Object};
+        //    //btEther2.Setup(b => b.MonitorOnce(It.IsAny<ITikConnection>()))
+        //    //    .Returns(ether2FakeBandwidthTestResult);
+        //    //btEther6.Setup(b => b.MonitorOnce(It.IsAny<ITikConnection>()))
+        //    //    .Returns(ether6FakeBandwidthTestResult);
+
+        //    var list = new List<BandwidthTestResult>
+        //        { btEther2.Object, btEther6.Object };
+
+        //    var btReader = new Mock<IEntityReader<BandwidthTestResult>>();
+
+        //    btReader.Setup(b => b.GetAll()).Returns(list.ToArray());
+
+        //    var poleTester = new PoleTester(_logger.Object, _connection.Object);
+
+        //    var btResults = poleTester.RunBandwithTests
+        //        (fakeInterfaceListToTestResults, fakeInterfacesNegotiation);
+
+        //    //Assert.Equal(fakeBandwithResults, btResults);
+
         //}
 
         private static MonitorEthernetResults MonitorOnceLocal(ITikConnection arg)
@@ -355,6 +461,16 @@ namespace Pole.Tester.Unit.Tests
                 default:
                     return Ether6FakeMonitorNegotiation;
             }
+        }
+
+        private static BandwidthTestResult RunLocal100(ITikConnection arg)
+        {
+            return ether2FakeBandwidthTestResult;
+        }
+
+        private static BandwidthTestResult RunLocal1000(ITikConnection arg)
+        {
+            return ether6FakeBandwidthTestResult;
         }
     }
 
