@@ -401,14 +401,7 @@ namespace Pole.Tester.Unit.Tests
         private static BandwidthTestResult[] RunLocal()
         {
             _count2++;
-            switch (_count2)
-            {
-                case 1:
-                    return Ether2FakeBandwidthTestResult;
-                default:
-                    return Ether6FakeBandwidthTestResult;
-            }
-
+            return _count2 == 1 ? Ether2FakeBandwidthTestResult : Ether6FakeBandwidthTestResult;
         }
 
 
