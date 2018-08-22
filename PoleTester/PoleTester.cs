@@ -95,8 +95,8 @@ namespace Pole.Tester
             return results;
         }
 
-        public List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> GetInterfacesNegotiation(
-            IEntityReader<InterfaceEthernet> ethReader)
+        public List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)>
+            GetInterfacesNegotiation(IEntityReader<InterfaceEthernet> ethReader)
         {
             var interfacesRunningNegotiation = new List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)>();
 

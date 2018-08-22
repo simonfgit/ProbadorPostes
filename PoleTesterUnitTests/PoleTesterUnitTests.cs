@@ -225,11 +225,11 @@ namespace Pole.Tester.Unit.Tests
         private static int _count2;
         private static int _count3;
 
-        private Mock<IEntityReader<InterfaceEthernet>> _ethReader;
+        private readonly Mock<IEntityReader<InterfaceEthernet>> _ethReader;
 
-        private Mock<ITikConnection> _connection;
+        private readonly Mock<ITikConnection> _connection;
 
-        private Mock<ILogger> _logger;
+        private readonly Mock<ILogger> _logger;
 
         #endregion
 
@@ -273,30 +273,6 @@ namespace Pole.Tester.Unit.Tests
             Assert.Equal(fakeInterfaceListToTestResults, interfaceToTest);
         }
 
-        //[Fact]
-        //public void ExpectedInterfacesPoeStatus()
-        //{
-        //    var fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
-
-        //    var eth4Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
-
-        //    var eth6Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
-
-        //    eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
-        //        .Returns(Ether4FakeMonitorPoeResults);
-        //    eth6Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
-        //        .Returns(Ether6FakeMonitorPoeResults);
-
-        //    var poeList = new List<IMonitoreable<MonitorPoeResults>>
-        //        { eth4Poe.Object, eth6Poe.Object }.ToArray();
-
-        //    var poleTester = new PoleTester(_logger.Object, _connection.Object);
-
-        //    var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeList);
-
-        //    Assert.Equal(fakeInterfacesPoeStatusResults, interfacesPoeStatus);
-        //}
-
         [Fact]
         public void ExpectedInterfacesPoeStatus()
         {
@@ -312,7 +288,7 @@ namespace Pole.Tester.Unit.Tests
             eth6.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
                 .Returns<ITikConnection>(MonitorPoEOnceLocal);
 
-            var list = new List<EthernetPoe>{ eth4.Object, eth6.Object };
+            var list = new List<EthernetPoe> { eth4.Object, eth6.Object };
 
             var poeReader = new Mock<IEntityReader<EthernetPoe>>();
 
@@ -389,7 +365,7 @@ namespace Pole.Tester.Unit.Tests
 
             var fakeBandwithTestInterfaces = GetFakeBandwithTestInterfaces();
 
-            var btest = new Mock<BandwidthTest>();
+            var btest = new Mock<IBandwidthTest>();
             btest.Setup(b => b.Run(It.IsAny<BandwidthTestParameters>(), It.IsAny<int>()))
                 .Returns(RunLocal);
 
@@ -403,8 +379,6 @@ namespace Pole.Tester.Unit.Tests
             Assert.Equal(fakeBandwithTestInterfaces, btResults);
 
         }
-
-
 
         private static MonitorEthernetResults MonitorOnceLocal(ITikConnection arg)
         {
