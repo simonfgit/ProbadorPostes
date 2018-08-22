@@ -223,6 +223,7 @@ namespace Pole.Tester.Unit.Tests
         private ITestOutputHelper _out;
         private static int _count;
         private static int _count2;
+        private static int _count3;
 
         private Mock<IEntityReader<InterfaceEthernet>> _ethReader;
 
@@ -237,6 +238,7 @@ namespace Pole.Tester.Unit.Tests
             _out = output;
             _count = 0;
             _count2 = 0;
+            _count3 = 0;
 
             _connection = new Mock<ITikConnection>();
 
@@ -271,36 +273,58 @@ namespace Pole.Tester.Unit.Tests
             Assert.Equal(fakeInterfaceListToTestResults, interfaceToTest);
         }
 
+        //[Fact]
+        //public void ExpectedInterfacesPoeStatus()
+        //{
+        //    var fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
+
+        //    var eth4Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
+
+        //    var eth6Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
+
+        //    eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
+        //        .Returns(Ether4FakeMonitorPoeResults);
+        //    eth6Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
+        //        .Returns(Ether6FakeMonitorPoeResults);
+
+        //    var poeList = new List<IMonitoreable<MonitorPoeResults>>
+        //        { eth4Poe.Object, eth6Poe.Object }.ToArray();
+
+        //    var poleTester = new PoleTester(_logger.Object, _connection.Object);
+
+        //    var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeList);
+
+        //    Assert.Equal(fakeInterfacesPoeStatusResults, interfacesPoeStatus);
+        //}
+
         [Fact]
         public void ExpectedInterfacesPoeStatus()
         {
             var fakeInterfacesPoeStatusResults = GetFakeInterfacesPoeStatusResults();
 
-            var eth4Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
+            var eth4 = new Mock<EthernetPoe>();
+            eth4.Object.Name = "ether4";
+            eth4.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorPoEOnceLocal);
 
-            var eth6Poe = new Mock<IMonitoreable<MonitorPoeResults>>();
+            var eth6 = new Mock<EthernetPoe>();
+            eth6.Object.Name = "ether6";
+            eth6.Setup(r => r.MonitorOnce(It.IsAny<ITikConnection>()))
+                .Returns<ITikConnection>(MonitorPoEOnceLocal);
 
-            eth4Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
-                .Returns(Ether4FakeMonitorPoeResults);
-            eth6Poe.Setup(c => c.MonitorOnce(It.IsAny<ITikConnection>()))
-                .Returns(Ether6FakeMonitorPoeResults);
+            var list = new List<EthernetPoe>{ eth4.Object, eth6.Object };
 
-            //var list = new  List<IMonitoreable<MonitorPoeResults>>{eth6Poe.Object, eth4Poe.Object}.ToArray();
+            var poeReader = new Mock<IEntityReader<EthernetPoe>>();
 
-            //var poeReader = new Mock<IEntityReader<MonitorPoeResults>>();
-
-            //poeReader.Setup(r => r.GetAll()).Returns(() =>
-            //{
-            //    var results = list;
-            //    return results;
-            // });
-
-            var poeList = new List<IMonitoreable<MonitorPoeResults>>
-                { eth4Poe.Object, eth6Poe.Object }.ToArray();
+            poeReader.Setup(r => r.GetAll()).Returns(() =>
+            {
+                var results = list.ToArray();
+                return results;
+            });
 
             var poleTester = new PoleTester(_logger.Object, _connection.Object);
 
-            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeList);
+            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeReader.Object);
 
             Assert.Equal(fakeInterfacesPoeStatusResults, interfacesPoeStatus);
         }
@@ -404,6 +428,11 @@ namespace Pole.Tester.Unit.Tests
             return _count2 == 1 ? Ether2FakeBandwidthTestResult : Ether6FakeBandwidthTestResult;
         }
 
+        private static MonitorPoeResults MonitorPoEOnceLocal(ITikConnection arg)
+        {
+            _count3++;
+            return _count3 == 1 ? Ether4FakeMonitorPoeResults : Ether6FakeMonitorPoeResults;
+        }
 
     }
 

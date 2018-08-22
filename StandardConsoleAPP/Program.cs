@@ -9,7 +9,6 @@ using Pole.Tester;
 using Serilog;
 using System;
 using System.IO;
-using System.Linq;
 using Log = Serilog.Log;
 
 namespace ProbadorPostes
@@ -73,13 +72,11 @@ namespace ProbadorPostes
 
             var poeReader = connection.CreateEntityReader<EthernetPoe>();
 
-            var poeInterfaces = poeReader.GetAll().ToArray();
-
             var poleTester = new PoleTester(Log.Logger, connection);
 
             var interfacesToTest = poleTester.GetNeighborsOnRunningInterfaces(etherReader, neighReader);
 
-            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeInterfaces);
+            var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeReader);
 
             var interfacesNegotiation = poleTester.GetInterfacesNegotiation(etherReader);
 
@@ -103,6 +100,8 @@ namespace ProbadorPostes
             connection.Dispose();
             Log.Logger.Information("Done!, press Enter to end");
             Console.ReadLine();
+
+            //hoy por hor la aplicación solo muestra los vecinos de UN equipo y no todo el grafo
         }
     }
 }
