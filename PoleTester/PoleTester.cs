@@ -6,7 +6,6 @@ using Eternet.Mikrotik.Entities.Ip;
 using Eternet.Mikrotik.Entities.ReadWriters;
 using Eternet.Mikrotik.Entities.Tool;
 using Serilog;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -167,7 +166,8 @@ namespace Pole.Tester
                 }
                 else
                 {
-                    Console.WriteLine("Negociación inválida");
+                    _logger.Information(
+                        "La negociación de la {Interface} es inválida ({Rate} full duplex {FullDuplex})", inter, nego.rate, nego.fullduplex);
                 }
             }
 
