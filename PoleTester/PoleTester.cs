@@ -61,21 +61,6 @@ namespace Pole.Tester
             return results;
         }
 
-        //public List<(string iface, EthernetPoeStatus poeStatus)> GetInterfacesPoeStatus(
-        //    IMonitoreable<MonitorPoeResults>[] poeReader)
-        //{
-        //    var results = new List<(string, EthernetPoeStatus)>();
-        //    foreach (var ethPoe in poeReader)
-        //    {
-        //        var poeStatus = ethPoe.MonitorOnce(_connection);
-        //        _logger.Information("La interface {Interface} tiene un estado Poe {PoeStatus}", poeStatus.Name,
-        //            poeStatus.PoeOutStatus);
-        //        results.Add((poeStatus.Name, poeStatus.PoeOutStatus));
-        //    }
-
-        //    return results;
-        //}
-
         public List<(string iface, EthernetPoeStatus poeStatus)> GetInterfacesPoeStatus(
             IEntityReader<EthernetPoe> poeReader)
         {
