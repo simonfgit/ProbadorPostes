@@ -116,8 +116,9 @@ namespace Pole.Tester
             return interfacesRunningNegotiation;
         }
 
-        public List<(string iface, string bandWith)> RunBandwithTests
-            (List<(string iface, string ip)> ifacesToTest, List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation, BandwidthTest bTest)
+        public List<(string iface, string bandWith)> RunBandwidthTests
+            (List<(string iface, string ip)> ifacesToTest,
+            List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation, IBandwidthTest bTest)
         {
             var btList = new List<(string iface, string bandWith)>();
 
@@ -143,19 +144,19 @@ namespace Pole.Tester
 
                     if (nego.rate == EthernetRates.Rate100Mbps)
                     {
-                        param.LocalTxSpeed = "81920k";
-                        param.RemoteTxSpeed = "81920k";
+                        param.LocalTxSpeed = "80M";
+                        param.RemoteTxSpeed = "80M";
                         result = bTest.Run(param, 30).Last();
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
-                            " con {Mbps}. Los resultados fueron {Tx} de bajada y {Rx} de subida con {PLost} paquetes perdidos",
-                            inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets);
+                            " con {Mbps}. Los resultados fueron {Tx}Mbps de bajada y {Rx}M de subida con {PLost} paquetes perdidos",
+                            inter, param.Duration, param.LocalTxSpeed, (result.TxTotalAverage / 1024 / 1024), result.RxTotalAverage, result.LostPackets);
                         btList.Add((inter, param.LocalTxSpeed));
                     }
                     else
                     {
-                        param.LocalTxSpeed = "122880k";
-                        param.RemoteTxSpeed = "122880k";
+                        param.LocalTxSpeed = "120M";
+                        param.RemoteTxSpeed = "120M";
                         result = bTest.Run(param, 30).Last();
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
@@ -172,57 +173,5 @@ namespace Pole.Tester
 
             return btList;
         }
-
-        //public List<(string iface, string duration, long txAverage, long rxAverage, long lostPackets)> RunBandwithTests
-        //    (List<(string iface, string ip)> ifacesToTest, List<(string name, string autonegotiation, bool fullduplex, EthernetRates rate)> ifacesNegotiation)
-        //{
-        //    var btList = new List<(string iface, string duration, long txAverage, long rxAverage, long lostPackets)>();
-
-        //    var bt = new BandwidthTest(_connection);
-
-        //    var result = new BandwidthTestResult();
-
-        //    var param = new BandwidthTestParameters
-        //    {
-        //        User = "admin",
-        //        Password = "",
-        //        Protocol = BandwidthTestProtocols.Udp,
-        //        Duration = "30s",
-        //        Direction = BandwidthTestDirections.Both
-        //    };
-
-        //    foreach (var iface in ifacesToTest)
-        //    {
-        //        var inter = iface.iface;
-        //        var nego = ifacesNegotiation.Find(n => n.name == inter);
-
-        //        if (nego.fullduplex && nego.rate != EthernetRates.Rate10Mbps)
-        //        {
-        //            param.Address = iface.ip;
-
-        //            if (nego.rate == EthernetRates.Rate100Mbps)
-        //            {
-        //                param.LocalTxSpeed = "81920k";
-        //                param.RemoteTxSpeed = "81920k";
-        //                result = bt.Run(param, 30).Last();
-        //                btList.Add((inter, result.Duration, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets));
-        //            }
-        //            else
-        //            {
-        //                param.LocalTxSpeed = "122880k";
-        //                param.RemoteTxSpeed = "122880k";
-        //                result = bt.Run(param, 30).Last();
-        //                btList.Add((inter, result.Duration, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets));
-
-        //            }
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("Negociación inválida");
-        //        }
-        //    }
-
-        //    return btList;
-        //}
     }
 }

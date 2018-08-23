@@ -195,9 +195,9 @@ namespace Pole.Tester.Unit.Tests
             return fakeInterfacesNegociation;
         }
 
-        private static List<(string iface, string bandwith)> GetFakeBandwithTestInterfaces()
+        private static List<(string iface, string bandwith)> GetFakeBandwidthTestInterfaces()
         {
-            var fakeBandwithTestInterfaces = new List<(string iface, string bandwith)> { ("ether2", "81920k"), ("ether6", "122880k") };
+            var fakeBandwithTestInterfaces = new List<(string iface, string bandwith)> { ("ether2", "80M"), ("ether6", "120M") };
 
             return fakeBandwithTestInterfaces;
         }
@@ -250,7 +250,6 @@ namespace Pole.Tester.Unit.Tests
         [Fact]
         public void ExpectedNeighborsOnRunningInterfaces()
         {
-            //Arrange
             var ethlist = GetFakeEthList();
 
             _ethReader.Setup(r => r.GetAll()).Returns(ethlist.ToArray);
@@ -265,11 +264,9 @@ namespace Pole.Tester.Unit.Tests
 
             var poleTester = new PoleTester(_logger.Object, _connection.Object);
 
-            //Act
             var interfaceToTest = poleTester.GetNeighborsOnRunningInterfaces
                 (_ethReader.Object, neigReader.Object);
 
-            //Assert
             Assert.Equal(fakeInterfaceListToTestResults, interfaceToTest);
         }
 
@@ -357,13 +354,13 @@ namespace Pole.Tester.Unit.Tests
         }
 
         [Fact]
-        public void ExpectedBandwithTestInterfaces()
+        public void ExpectedBandwidthTestInterfaces()
         {
             var fakeInterfaceListToTestResults = GetFakeEthToTestResults();
 
             var fakeInterfacesNegotiation = GetFakeInterfacesNegotiation();
 
-            var fakeBandwithTestInterfaces = GetFakeBandwithTestInterfaces();
+            var fakeBandwidthTestInterfaces = GetFakeBandwidthTestInterfaces();
 
             var btest = new Mock<IBandwidthTest>();
             btest.Setup(b => b.Run(It.IsAny<BandwidthTestParameters>(), It.IsAny<int>()))
@@ -371,12 +368,10 @@ namespace Pole.Tester.Unit.Tests
 
             var poleTester = new PoleTester(_logger.Object, _connection.Object);
 
-            var btResults = poleTester.RunBandwithTests
+            var btResults = poleTester.RunBandwidthTests
                 (fakeInterfaceListToTestResults, fakeInterfacesNegotiation, btest.Object);
 
-            //virtual metodo Run - simil Monitor Once
-
-            Assert.Equal(fakeBandwithTestInterfaces, btResults);
+            Assert.Equal(fakeBandwidthTestInterfaces, btResults);
 
         }
 

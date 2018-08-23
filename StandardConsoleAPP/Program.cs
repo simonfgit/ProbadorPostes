@@ -22,24 +22,6 @@ namespace ProbadorPostes
             return connection;
         }
 
-        private static void RunBandwidthTestSample(ITikConnection connection)
-        {
-            var p = new BandwidthTestParameters
-            {
-                Address = "192.168.0.70",
-                User = "admin",
-                Password = "",
-                Protocol = BandwidthTestProtocols.Udp,
-                Duration = "10s",
-                LocalTxSpeed = "1024k",
-                RemoteTxSpeed = "1024k"
-            };
-            var btest = new BandwidthTest(connection);
-            var results = btest.Run(p, 5);
-            foreach (var r in results)
-                Console.WriteLine($"{r.Status} {r.RxTotalAverage} {r.TxTotalAverage}");
-        }
-
         private static ConfigurationClass InitialSetup()
         {
             var builder = new ConfigurationBuilder()
@@ -72,6 +54,8 @@ namespace ProbadorPostes
 
             var poeReader = connection.CreateEntityReader<EthernetPoe>();
 
+            var bTest = new BandwidthTest(connection);
+
             var poleTester = new PoleTester(Log.Logger, connection);
 
             var interfacesToTest = poleTester.GetNeighborsOnRunningInterfaces(etherReader, neighReader);
@@ -79,6 +63,8 @@ namespace ProbadorPostes
             var interfacesPoeStatus = poleTester.GetInterfacesPoeStatus(poeReader);
 
             var interfacesNegotiation = poleTester.GetInterfacesNegotiation(etherReader);
+
+            var interfacesBandwidthTest = poleTester.RunBandwidthTests(interfacesToTest, interfacesNegotiation, bTest);
 
             foreach (var ethtotest in interfacesToTest)
             {
@@ -95,13 +81,9 @@ namespace ProbadorPostes
                 Log.Logger.Information("Negotiation {InterfaceNegotiation}", ifaceNegotiation.ToString());
             }
 
-            //var btList = poleTester.RunBandwithTests(interfacesToTest, interfacesNegotiation,);
-
             connection.Dispose();
             Log.Logger.Information("Done!, press Enter to end");
             Console.ReadLine();
-
-            //hoy por hor la aplicación solo muestra los vecinos de UN equipo y no todo el grafo
         }
     }
 }
