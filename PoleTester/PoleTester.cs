@@ -150,7 +150,7 @@ namespace Pole.Tester
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
                             " con {Mbps}. Los resultados fueron {Tx}Mbps de bajada y {Rx}M de subida con {PLost} paquetes perdidos",
-                            inter, param.Duration, param.LocalTxSpeed, (result.TxTotalAverage / 1024 / 1024), result.RxTotalAverage, result.LostPackets);
+                            inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage / 1024 / 1024, result.RxTotalAverage / 1024 / 1024, result.LostPackets);
                         btList.Add((inter, param.LocalTxSpeed));
                     }
                     else
@@ -160,8 +160,8 @@ namespace Pole.Tester
                         result = bTest.Run(param, 30).Last();
                         _logger.Information(
                             "Se realizo un Bandwith Test sobre la {Interface} de {Duration}" +
-                            " con {Mbps}. Los resultados fueron {Tx} de bajada y {Rx} de subida con {PLost} paquetes perdidos",
-                            inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage, result.RxTotalAverage, result.LostPackets);
+                            " con {Mbps}. Los resultados fueron {Tx}M de bajada y {Rx}M de subida con {PLost} paquetes perdidos",
+                            inter, param.Duration, param.LocalTxSpeed, result.TxTotalAverage / 1024 / 1024, result.RxTotalAverage / 1024 / 1024, result.LostPackets);
                         btList.Add((inter, param.LocalTxSpeed));
                     }
                 }
